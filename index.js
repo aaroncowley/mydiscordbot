@@ -2,12 +2,12 @@ const { join } = require('node:path');
 const { Events, Client, VoiceChannel, GatewayIntentBits, Collection } = require('discord.js');
 const {
     joinVoiceChannel,
-	createAudioPlayer,
-	createAudioResource,
-	entersState,
-	StreamType,
-	AudioPlayerStatus,
-	VoiceConnectionStatus
+    createAudioPlayer,
+    createAudioResource,
+    entersState,
+    StreamType,
+    AudioPlayerStatus,
+    VoiceConnectionStatus,
 } = require('@discordjs/voice');
 const { token } = require('./config.json');
 
@@ -21,62 +21,61 @@ function playSong() {
 }
 
 async function connectToChannel(channel) {
-	const connection = joinVoiceChannel({
-		channelId: channel.id,
-		guildId: channel.guild.id,
-		adapterCreator: channel.guild.voiceAdapterCreator,
-	});
+    const connection = joinVoiceChannel({
+        channelId: channel.id,
+        guildId: channel.guild.id,
+        adapterCreator: channel.guild.voiceAdapterCreator,
+    });
     try {
-		await entersState(connection, VoiceConnectionStatus.Ready, 10_000);
+        await entersState(connection, VoiceConnectionStatus.Ready, 10_000);
 
-		return connection;
-	} catch (error) {
+        return connection;
+    }
+    catch (error) {
 
-		connection.destroy();
-		throw error;
-	}
+        connection.destroy();
+        throw error;
+    }
 }
 
 const client = new Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.GuildMembers,
-		GatewayIntentBits.GuildVoiceStates
-	],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildVoiceStates,
+    ],
 });
 
 client.login(token);
 
 client.on('ready', async () => {
-	console.log('Discord.js client is ready!');
+    console.log('Discord.js client is ready!');
 });
 
 client.on('messageCreate', async (message) => {
-	if (!message.guild) {
-	    console.log('oops');
+    if (!message.guild) {
+        console.log('oops');
     }
 
-	if (message.content === 'fart') {
-		const channel = message.member?.voice.channel;
+    if (message.content === 'fart') {
+        const channel = message.member?.voice.channel;
 
-		if (channel) {
-			try {
-				const connection = await connectToChannel(channel);
-				await connection.subscribe(player);
+        if (channel) {
+            try {
+                const connection = await connectToChannel(channel);
+                connection.subscribe(player);
                 await playSong();
-				message.reply('Playing now!');
-			} catch (error) {
-				console.error(error);
-			}
-		} else {
-			message.reply('Join a voice channel then try again!');
-		}
-	}
+                message.reply('Playing now!');
+            }
+            catch (error) {
+                console.error(error);
+            }
+        }
+        else {
+            message.reply('Join a voice channel then try again!');
+        }
+    }
 
 });
-
-
-
-
